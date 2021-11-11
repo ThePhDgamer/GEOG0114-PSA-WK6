@@ -3,7 +3,7 @@
     "path": "~/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6/index.Rmd",
     "project_path": "index.Rmd",
     "type": "r_markdown",
-    "hash": "4053862431",
+    "hash": "2932219817",
     "contents": "",
     "dirty": false,
     "created": 1636645031808.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "18,2",
-        "scrollLine": "4"
+        "cursorPosition": "45,0",
+        "scrollLine": "35"
     },
     "folds": "",
-    "lastKnownWriteTime": 1636645927,
+    "lastKnownWriteTime": 1636647390,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1636645927419,
+    "last_content_update": 1636647390417,
     "read_only": false,
     "read_only_alternatives": []
 }
