@@ -172,7 +172,7 @@ tm_shape(US_Nation_Border_shp) + tm_polygons(alpha = 0, border.col = "black") +
 
 <center>
 
-!["/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6/docs"](docs/Image1_1.png)
+!["/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6/docs"](Image1_1.png)
 </center>
 
 <hr style="border:2px solid gray"> </hr>
