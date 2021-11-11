@@ -2,11 +2,11 @@ name: "my-website"
 navbar:
   title: "GEOG0114 Principles of Spatial Analysis"
   left:
-    - text: "Getting Started"
+    - text: "1. Getting Started"
       href: index.html
-    - text: "Variogram Analysis"
+    - text: "2. Variogram Analysis"
       href: variogram.html
-    - text: "Kriging"
+    - text: "3. Kriging"
       href: kriging.html
-    - text: "Recommended Reading"
+    - text: "4. Recommended Reading"
       href: recommendation.html

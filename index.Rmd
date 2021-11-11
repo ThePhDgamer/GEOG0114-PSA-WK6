@@ -40,6 +40,140 @@ knitr::opts_knit$set(root.dir = "/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA
 knitr::opts_chunk$set(cache = TRUE)
 ```
 
-## Let's begin
+## **1.1. Let's begin**
 In previous sessions, we investigated the presence of spatial autocorrelation in data using **Moran I's test** and in spatial
-lag and error models. Today, we will learn how do this using semivariogram analysis. 
+lag and error models. Today, we will learn how to do this through **semivariogram** analysis which can be used to create continuous predictive maps based on spatial interpolation using **Kriging**. In this session, we will investigate spatial variation in outcomes that are, in theory, **spatially continuous**; for example, the concentrations of ambient air pollutants such as Sulphur dioxide ($SO_{2}$) 
+(a toxic gas emitted from sulphur rich fuels (i.e., coal, oil or diesel) when burnt) which can be present anywhere but in practice 
+are only measured in specified point locations, such as air quality monitoring stations.
+
+We will assess for the presence of spatial autocorrelation, which describes the correlation of a variable with itself through
+geographic space. Here, a **Positive Autocorrelation** exists when measurements close to one another are alike than they 
+would be due to chance or through random sampling. The presence of autocorrelation for spatially continuous phenomena can
+be established using **semivariograms**.
+
+Estimation from model semivariograms can be used to **interpolate** across a study area, whereby values at unsampled locations
+are predicted from neighbouring sites. A popular form of interpolation, which is based on the spatial attribute's outcome
+variable, is known as Kriging (a technique named after a South African engineer, Danie G. Krige (1919 to 2013)).
+
+**OBJECTIVES**: The US Environmental Agency have position air quality monitors for surveillance of over 100 different types pollutants that exist as toxic gases, particulates and heavy metals. For **Sulphur Dioxide** ($SO_{2}$), there are 458 active air 
+monitors that takes hourly readings for concentrations of $SO_{2}$ (in parts per billion (pbb)) . An annual estimate for $SO_{2}$ was calculated for each station at its location. Car usage, alongside of other anthropogenic activities such as coal burning, across the USA increases the risk of elevated pollution of $SO_{2}$.
+
+Using geostatistical methods and taking into account of car usage - what areas in USA have higher concentrations of $SO_{2}$ exceeding the annual average of 40 ppb which a national safety limit for cause of concern?
+
+</br>
+
+## **1.2. Datasets & setting up the work directory** 
+Before you begin do make sure to download all data from [**Moodle**](https://moodle.ucl.ac.uk). If you are working from 
+a UCL workstation, do create a folder called "**Week 6**" within your "**GEOG0114**" folder stored in the N-drive.
+
+Extract all data from the zip folder and stored into "**Week 6**" folder. Open a new R script and set the work directory 
+to Week 6's folder (i.e., **Home (N:) > GEOG0114 > Week 6**)
+
+```{r, eval = FALSE}
+# Set working directory to Week 6 folder
+setwd("N:/GEOG0114/Week 6")
+```
+
+</br>
+
+## **1.3. Loading and installing packages**
+
+We will need to load the following packages:
+
+- `sf`: Simple Features
+- `tmap`: Thematic Mapping
+- `raster`: Raster/gridded data analysis and manipulation
+- `sp`: Package for providing classes for spatial data (points, lines, polygons and grids)
+
+```{r, message = FALSE, warning= FALSE}
+# Load packages using library() function
+library("sf")
+library("tmap")
+library("raster")
+library("sp")
+```
+
+```{r, include = FALSE}
+library("gstat")
+```
+
+The above packages `sf`, `tmap`, `raster` & `sp`  should have been installed in the previous session(s). We will need to 
+install the following package:
+
+- `gstat`: provides functions for univariable and multivariable geostatistical analysis.
+
+```{r, eval = FALSE}
+# Install the packages: gstat using the install.package()
+install.packages("gstat")
+
+# Load the packages with library()
+library("gstat")
+```
+
+</br>
+
+## **1.4. Loading datasets**
+
+Let us first import the quantitative data i.e., `US 2019 SO2 Emissions data.csv` into R/RStudio.
+
+```{r, message = FALSE, warning = FALSE}
+# Use read.csv() to import 
+datafile <- read.csv(file = "US 2019 SO2 Emissions data.csv", header = TRUE, sep = ",")
+```
+
+**NOTE**: The description of the column names are as follows:
+
+**Column Name** | **Description**
+------------ | -------------
+`CountyRef` | The County & State for where the air quality monitors are located in US
+`Longitude` | Longitude (in decimal degrees)
+`Latitude` | Latitude (in decimal degrees)
+`Mean_SO2` | Annual Mean (ppb) concentrations of Ambient sulphur dioxide ($SO_{2}$) in 2019 
+`CarIndex` | Proportion of households within a census tract that own at least 2 cars 
+|
+- US National border shape file: `US Nation Border.shp`
+- US State border shape file: `US State Borders.shp`
+
+```{r}
+# Use read_sf() function to load shape file 
+US_Nation_Border_shp <- st_read("US Nation Border.shp")
+US_State_Border_shp <- st_read("US State Borders.shp")
+```
+
+</br>
+
+## **1.5. Data preparation**
+There are a couple of things we need to do before proceeding with the analysis: 
+
+1. The `datafile` is a data frame object in RStudio's memory, and not a spatial object. We need to coerce into a spatial `sf` object
+2. The shapefiles for `US Nation Border.shp` & `US State Borders.shp` are in a different CRS called **Spherical Mercator 3857**
+which measures distance in meters and not in decimal degrees. We need to transform the `longitude` and `latitude` of our stations
+which are in decimal degrees to the CRS of **Spherical Mercator 3857**
+
+```{r}
+# Coerce the spreadsheet into a sf object
+# First tell R that it’s coordinates are currently in decimal degrees (i.e., WGS84 'crs = 4326') before the transformation
+datafile_sf <- st_as_sf(datafile, coords = c("Longitude", "Latitude"), crs = 4326)
+# Now apply the transformation from WGS84 to Mercator i.e., = 3857
+datafile_sf_prj <- st_transform(datafile_sf, 3857)
+# Inspect the details
+st_crs(datafile_sf_prj)
+```
+
+The code chunk below generates an empty map with the `tmap` functions. It shows just the border of USA and the point
+locations for the air quality monitoring stations superimposed.
+
+```{r, eval=FALSE}
+tm_shape(US_Nation_Border_shp) + tm_polygons(alpha = 0, border.col = "black") + 
+	tm_shape(datafile_sf_prj) + tm_dots() + 
+	tm_scale_bar(position = c("left","bottom")) +
+	tm_compass(position = c("right", "bottom"))
+```
+
+<center>
+
+!["/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6/docs"](docs/Image1_1.png)
+</center>
+
+<hr style="border:2px solid gray"> </hr>
+
