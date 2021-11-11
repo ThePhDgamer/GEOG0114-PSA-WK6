@@ -1,0 +1,3 @@
+---
+title: "Spatial Prediction with Kriging"
+---
