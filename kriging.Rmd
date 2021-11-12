@@ -122,7 +122,62 @@ tm_shape(US_Nation_Border_shp) + tm_polygons(alpha = 0, border.col = "black") + 
 !["/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6"](Image3_1.png)
 </center>
 
-Let us visualise the variance:
+The above shows the predicted concentrations of ambient $SO_{2}$; however, the predicted surface is very smooth and it difficult
+to see the spatial patterns. One technique, which is sometimes useful, for raster data is to reclassify the pixels to zones instead
+of pixel-point estimates.
+
+We could reclassify the continuous values stored in the grids/pixels into discrete values using the following scheme:
+- 0 = `"< 1.0 ppb"`
+- 1 = `"1.0-4.9 ppb"`
+- 2 = `"5.0-9.9 ppb"`
+- 3 = `"10.0-14.9 ppb"`
+- 4 = `"15.0-19.9 ppb"`
+- 5 = `"20.0-29.9 ppb"`
+- 6 = `"30.0-39.9 ppb"`
+- 7 = `"+40.0 ppb"`
+
+You can do this by using following code:
+
+```{r, message=FALSE, warning=FALSE}
+# Create a vector for the reclassification -i.e., 1st row captures values between 0 and below 1 to reclassify a pixel as 0
+# the 2nd row in this vector captures values between 1 and below 5 to reclassify a pixel as 1 and so on and so forth
+reclassifyRaster <- c(0,1,0,
+1,5,1,
+5,10,2,
+10,15,3,
+15,20,4,
+20,30,5,
+30,40,6,
+40,70,7)
+
+# Then store the values into a matrix 
+reclassifyRaster_Mat <- matrix(reclassifyRaster, ncol=3, byrow=TRUE)
+reclassifyRaster_Mat
+```
+
+Now, apply the matrix to the raster object to reclassify the pixels accordingly using the `reclassify()` function:
+```{r, eval=FALSE}
+exp.prediction_masked_rec <- reclassify(exp.prediction_masked, reclassifyRaster_Mat)
+```
+
+Now, lets visualise the zones:
+```{r, eval=FALSE}
+tm_shape(US_Nation_Border_shp) + tm_polygons(alpha = 0, border.col = "black") + # add base map of borders here
+	tm_shape(exp.prediction_masked_rec) + tm_raster(title = "Predicted SO2 ppb", style = "cat", palette = "Reds", 
+					 labels = c("<1.0 ppbs","1.0-4.9 ppb","5.0-9.9 ppb", "10.0-14.9 ppb" , "15.0-19.9 ppb", "20.0-29.9 ppb", "30.0-39.9 ppb","+40.0ppb")) +
+	tm_shape(US_State_Borders_shp) + tm_polygons(alpha = 0, border.col = "black") +
+	tm_text("STUSPS", size = "AREA") +
+	tm_shape(datafile_sf_prj) + tm_dots() + 
+	tm_scale_bar(position = c("left","bottom")) +
+	tm_compass(position = c("right", "bottom")) +
+	tm_layout(frame = FALSE, legend.title.size = 0.5, legend.text.size = 0.5)
+```
+
+<center>
+!["/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6"](Image3_2_5.png)
+</center>
+
+You can visualise the variance:
 ```{r, eval=FALSE}
 # mask values of raster outside regions of US Border
 exp.variance_masked <- mask(exp.variance, US_Nation_Border_sp_shp)
@@ -142,8 +197,7 @@ tm_shape(US_Nation_Border_shp) + tm_polygons(alpha = 0, border.col = "black") + 
 </center>
 
 <p class="comment">
-**IMPORTANT NOTES**: The above example was a null model. We can include risk factors as adjustments for the prediction. The below code shows you how to incorporate other variables in the analysis. We will use the `CarIndex` column. In most cases the results 
-are similar.
+**IMPORTANT NOTES**: The above example was a null model. We can include risk factors as adjustments for the prediction. The below code shows you how to incorporate other variables in the analysis. We will use the `CarIndex` column. In most cases the results are similar.
 </p>
 
 ```{r, eval = FALSE}
@@ -172,3 +226,5 @@ writeRaster(exp.variance_adj, "Adjusted Variance SO2 levels in USA.tif", format=
 
 # use tmap functions like before
 ```
+
+<hr style="border:2px solid gray"> </hr>

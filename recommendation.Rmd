@@ -48,3 +48,10 @@ pre {
 ## **4.2. Data Sources**
 1. The pollution data was obtained from the United States Environmental Protection Agency (EPA) [**Click Here**](https://aqs.epa.gov/aqsweb/airdata/download_files.html) 
 2. Spatial data concerning car usage in the US was sourced from the ACS Vehicle Availability Variables project [**Click Here**](https://www.arcgis.com/home/item.html?id=9a9e43ec1603446880c50d4ed1df2207). You would need to have Online ArcGIS account to access the resources. 
+
+</br>
+
+## **4.3. Homework Exercise**
+Just like $SO_{2}$, Nitrogen Oxides $NO_{X}$ are toxic gases emitted from cars, coal burning and other industrial anthropogenic-related activities. What regions in the USA have higher concentrations of $NO_{X}$ exceeding the annual average of 40 ppb? Try using the methods learnt in this practical session to make such spatial prediction. The spatial records (i.e., `NOX dataset.csv`) for Nitrogen Oxide $NO_{X}$ can be download from [**Moodle**](https://moodle.ucl.ac.uk).
+
+<hr style="border:2px solid gray"> </hr>

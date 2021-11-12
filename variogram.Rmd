@@ -80,11 +80,18 @@ dependence there is in the data and less useful Kriging will be.
 locations; and ii.) **isotropic**, spatial autocorrelation is the same in every direction. If the autocorrelation differs by direction, it is termed as **anisotropic**.
 </p>
 
-To be used in Kriging, a semivariogram plot (akin to the above image) must be generated to estimate the 3 parameters (i.e., sill, nugget & range) from the points termed **experimental** or **empirical semivariogram**. These are used as initial values to fit a **modelled** or **theoretical semivariogram** which can be in one of four major forms:
-1. Exponential Model (Dark Blue line)
-2. Spherical Model (Red line)
-3. Gaussian Model (Light Blue line)
-4. Power Model (Magenta line)
+To be used in Kriging, a semivariogram plot (akin to the above image) must be generated to estimate the 3 parameters (i.e., sill, nugget & range) from the points termed **experimental** or **empirical semivariogram**. These are used as initial values to fit a **modelled** or **theoretical semivariogram** which can be in one of three major forms:
+1. Gaussian Model (Left)
+2. Spherical Model (Center)
+3. Exponential Model (Right)
+
+</br>
+
+<center>
+!["/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6"](Image2_1_5.png)
+</center>
+
+</br>
 
 Once the modelled semivariogram has been defined, it can be used in Kriging. 
 

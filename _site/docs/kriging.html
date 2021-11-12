@@ -293,6 +293,13 @@ body{/* Normal */
     text-align: justify;
 }
 
+p.comment {
+background-color: #DBDBDB;
+padding: 10px;
+border: 1px solid black;
+border-radius: 5px;
+}
+
 code.r{
   font-size: 10px;
 }
@@ -302,8 +309,91 @@ pre {
 </style>
 <hr style="border:2px solid gray">
 </hr>
-<div id="spatial-prediction-with-kriging" class="section level2">
-<h2><strong>3.1. Spatial Prediction with Kriging</strong></h2>
+<div id="building-the-raster-template" class="section level2">
+<h2><strong>3.1. Building the Raster Template</strong></h2>
+<p>Let us create a template raster for interpolation. The extent of the raster template should based on the points. We are going to make the resolution of grid be at 5000m by 5000m (5km by 5km) accordingly.</p>
+<pre class="r"><code>RasterTemplate &lt;- raster(datafile_sp_prj)
+res(RasterTemplate) &lt;- 5000</code></pre>
+<p>Next, declare template as a spatial grid</p>
+<pre class="r"><code>grid.interpolation &lt;- as(RasterTemplate, &#39;SpatialGrid&#39;)</code></pre>
+</div>
+<div id="spatial-interpolation-using-kriging" class="section level2">
+<h2><strong>3.2. Spatial Interpolation using Kriging</strong></h2>
+<p>Now, we are going to use the parameters from the exponential theoretical semivariogram model to interpolate the concentrations of ambient SO2 for the entire study region</p>
+<pre class="r"><code>modelKrigingExp &lt;- gstat(formula = Mean_SO2~1, locations = datafile_sp_prj, model = exp_SO2_emp.variogram)</code></pre>
+<p>The results are stored in <code>modelKrigingExp</code> object. Lets add the results of the interpolation to our grid template using the <code>predict()</code> function</p>
+<pre class="r"><code># this may take roughly 5mins
+Kriged_SO2 &lt;- predict(modelKrigingExp, grid.interpolation)</code></pre>
+<p>The above analysis produces two separate rasters: i.) Predicted <span class="math inline">\(SO_{2}\)</span> and ii.) Variation in <span class="math inline">\(SO_{2}\)</span>. Let export the results and make some visualisation using the <code>tmap</code> functions</p>
+</div>
+<div id="export-the-results-as-.tiff-format-and-thematic-visualisation-in-tmap" class="section level2">
+<h2><strong>3.3. Export the results as .tiff format and Thematic visualisation in</strong> <code>tmap</code></h2>
+<p>Save both the prediction and variance a multi-layer raster (a ‘brick’ raster):</p>
+<pre class="r"><code>brickedKriged_SO2_Results &lt;- brick(Kriged_SO2)</code></pre>
+<p>We can save them individually from the multi-layer raster as follows:</p>
+<pre class="r"><code># Separate the rasters accordingly
+exp.prediction &lt;- raster(brickedKriged_SO2_Results, layer = 1)
+exp.variance &lt;- raster(brickedKriged_SO2_Results, layer = 2)
+#  save the output locally on your computer
+writeRaster(exp.prediction, &quot;Predicted SO2 levels in USA.tif&quot;, format=&quot;GTiff&quot;, overwrite = TRUE)
+writeRaster(exp.variance, &quot;Variance SO2 levels in USA.tif&quot;, format=&quot;GTiff&quot;, overwrite = TRUE)</code></pre>
+<p>Let us visualise the predictions:</p>
+<pre class="r"><code># mask values of raster outside regions of US Border
+exp.prediction_masked &lt;- mask(exp.prediction, US_Nation_Border_sp_shp)
+
+tm_shape(US_Nation_Border_shp) + tm_polygons(alpha = 0, border.col = &quot;black&quot;) + # add base map of borders here
+    tm_shape(exp.prediction_masked) + tm_raster(title = &quot;Predicted SO2 ppb&quot;, style = &quot;cont&quot;, palette = &quot;Reds&quot;) +
+    tm_shape(US_State_Borders_shp) + tm_polygons(alpha = 0, border.col = &quot;black&quot;) +
+    tm_text(&quot;STUSPS&quot;, size = &quot;AREA&quot;) +
+    tm_shape(datafile_sf_prj) + tm_dots() + 
+    tm_scale_bar(position = c(&quot;left&quot;,&quot;bottom&quot;)) +
+    tm_compass(position = c(&quot;right&quot;, &quot;bottom&quot;)) +
+    tm_layout(frame = FALSE, legend.title.size = 0.5, legend.text.size = 0.5)</code></pre>
+<center>
+<img src="Image3_1.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
+</center>
+<p>Let us visualise the variance:</p>
+<pre class="r"><code># mask values of raster outside regions of US Border
+exp.variance_masked &lt;- mask(exp.variance, US_Nation_Border_sp_shp)
+
+tm_shape(US_Nation_Border_shp) + tm_polygons(alpha = 0, border.col = &quot;black&quot;) + # add base map of borders here
+    tm_shape(exp.variance_masked) + tm_raster(title = &quot;Variance SO2 ppb&quot;, style = &quot;cont&quot;, palette = &quot;Reds&quot;) +
+    tm_shape(US_State_Borders_shp) + tm_polygons(alpha = 0, border.col = &quot;black&quot;) +
+    tm_text(&quot;STUSPS&quot;, size = &quot;AREA&quot;) +
+    tm_shape(datafile_sf_prj) + tm_dots() + 
+    tm_scale_bar(position = c(&quot;left&quot;,&quot;bottom&quot;)) +
+    tm_compass(position = c(&quot;right&quot;, &quot;bottom&quot;)) +
+    tm_layout(frame = FALSE, legend.title.size = 0.5, legend.text.size = 0.5)</code></pre>
+<center>
+<img src="Image3_2.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
+</center>
+<p class="comment">
+<strong>IMPORTANT NOTES</strong>: The above example was a null model. We can include risk factors as adjustments for the prediction. The below code shows you how to incorporate other variables in the analysis. We will use the <code>CarIndex</code> column. In most cases the results are similar.
+</p>
+<pre class="r"><code># use variogram() function to compute the semivariance 
+SO2_adj_emp.variogram &lt;- variogram(Mean_SO2~CarIndex, datafile_sp_prj)
+# Compute the object to reveal a table
+SO2_adj_emp.variogram
+# Plot the empirical semivariogram and extract initial values
+plot(SO2_adj_emp.variogram)
+
+# Determine best model
+best_SO2_adj_emp.variogram &lt;- fit.variogram(SO2_adj_emp.variogram, model = vgm(c(&quot;Exp&quot;, &quot;Gau&quot;, &quot;Sph&quot;)))
+best_SO2_adj_emp.variogram # exponential is the best again. 
+plot(SO2_adj_emp.variogram, best_SO2_adj_emp.variogram, main = &quot;Best Model: Exponential (Nug: 3.6, PSill: 55.9, Range: 295077m)&quot;)
+
+# reusing raster templates for predictions
+modelKrigingExp_adj &lt;- gstat(formula = Mean_SO2~CarIndex, locations = datafile_sp_prj, model = best_SO2_adj_emp.variogram)
+Kriged_SO2_adj &lt;- predict(modelKrigingExp_adj, grid.interpolation)
+brickedKriged_SO2_Results_adj &lt;- brick(Kriged_SO2_adj)
+
+exp.prediction_adj &lt;- raster(brickedKriged_SO2_Results_adj, layer = 1)
+exp.variance_adj &lt;- raster(brickedKriged_SO2_Results_adj, layer = 2)
+
+writeRaster(exp.prediction_adj, &quot;Adjusted Predicted SO2 levels in USA.tif&quot;, format=&quot;GTiff&quot;, overwrite = TRUE)
+writeRaster(exp.variance_adj, &quot;Adjusted Variance SO2 levels in USA.tif&quot;, format=&quot;GTiff&quot;, overwrite = TRUE)
+
+# use tmap functions like before</code></pre>
 </div>
 
 
