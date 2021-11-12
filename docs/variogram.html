@@ -293,6 +293,13 @@ body{/* Normal */
     text-align: justify;
 }
 
+p.comment {
+background-color: #DBDBDB;
+padding: 10px;
+border: 1px solid black;
+border-radius: 5px;
+}
+
 code.r{
   font-size: 10px;
 }
@@ -304,6 +311,103 @@ pre {
 </hr>
 <div id="semivariogram-analysis" class="section level2">
 <h2><strong>2.1. Semivariogram analysis</strong></h2>
+<p>Semivariograms describe how data are related with distance by plotting the <strong>semivariance</strong> against the <strong>separation distance</strong>, known as the <strong>experimental</strong> or <strong>empirical semivariogram</strong>. The semivariance is defined as half the average squared difference between points separated by some distance <em>h</em>. As the separation distance <em>h</em> between samples increase, we would expect the semivariance to also increase (again, because near samples are more similar than distant samples).</p>
+<center>
+<img src="Image2_1.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
+</center>
+<p>In the generic semivariogram shown above, there are three important parameters:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Sill</strong>: The maximum semivariance value observed, and it indicates the threshold for values beyond (i.e., flatline) which there is no spatial autocorrelation. <strong>NOTE</strong>: the <strong>Partial Sill</strong> is a value calculated by taking the difference between the <strong>Sill</strong> and <strong>Nugget</strong> (i.e., <strong>Partial Sill = Sill - Nugget</strong>)</li>
+<li><strong>Range</strong>: The maximum separation distance <em>h</em> at which we will expect to find evidence of spatial autocorrelation. A separation distance beyond the <strong>range</strong> samples are no longer correlated.</li>
+<li><strong>Nugget</strong>: This describes the variance of the measurement error combined with spatially uncorrelated variations at distances shorter than the sample spacing, namely noise in the data. The larger the <strong>nugget</strong> relative to the <strong>sill</strong>, the less spatial dependence there is in the data and less useful Kriging will be.</li>
+</ol>
+<p class="comment">
+<strong>IMPORTANT NOTES</strong>: Two important assumptions of a basic semivariogram are that the spatial process under investigation are: i.) <strong>stationary</strong>, i.e., the spatial autocorrelation between the measurements of same variables in a given area is the same for all locations; and ii.) <strong>isotropic</strong>, spatial autocorrelation is the same in every direction. If the autocorrelation differs by direction, it is termed as <strong>anisotropic</strong>.
+</p>
+<p>To be used in Kriging, a semivariogram plot (akin to the above image) must be generated to estimate the 3 parameters (i.e., sill, nugget &amp; range) from the points termed <strong>experimental</strong> or <strong>empirical semivariogram</strong>. These are used as initial values to fit a <strong>modelled</strong> or <strong>theoretical semivariogram</strong> which can be in one of four major forms: 1. Exponential Model (Dark Blue line) 2. Spherical Model (Red line) 3. Gaussian Model (Light Blue line) 4. Power Model (Magenta line)</p>
+<p>Once the modelled semivariogram has been defined, it can be used in Kriging.</p>
+<p></br></p>
+</div>
+<div id="plotting-the-empirical-semivariogram" class="section level2">
+<h2><strong>2.2. Plotting the Empirical Semivariogram</strong></h2>
+<p>Use the function <code>variogram()</code> to create the object for plotting the empirical variogram</p>
+<pre class="r"><code># coerce datafile_sf_prj to be a &#39;sp&#39; spatial dataframe object as it variogram does not use &#39;sf&#39; objects
+# ignore warning message
+datafile_sp_prj &lt;- as(datafile_sf_prj, &quot;Spatial&quot;)
+# use variogram() function to compute the semivariance with a null model Mean_SO2 as outcome
+SO2_emp.variogram &lt;- variogram(Mean_SO2~1, datafile_sp_prj)
+# Compute the object to reveal a table
+SO2_emp.variogram</code></pre>
+<pre><code>##      np       dist    gamma dir.hor dir.ver   id
+## 1  1600   80215.64 16.67617       0       0 var1
+## 2  2787  243459.82 40.64445       0       0 var1
+## 3  4323  399559.96 34.30631       0       0 var1
+## 4  5058  554337.13 44.93295       0       0 var1
+## 5  5408  710314.24 67.66873       0       0 var1
+## 6  5749  867144.10 58.51999       0       0 var1
+## 7  6020 1025117.47 72.54208       0       0 var1
+## 8  5922 1183536.29 81.79818       0       0 var1
+## 9  5204 1340649.65 59.92406       0       0 var1
+## 10 5516 1499090.63 39.48967       0       0 var1
+## 11 5548 1655939.11 39.47046       0       0 var1
+## 12 5368 1811663.84 39.18724       0       0 var1
+## 13 4568 1968825.44 37.81360       0       0 var1
+## 14 4151 2126333.33 58.96861       0       0 var1
+## 15 3718 2284808.08 44.72158       0       0 var1</code></pre>
+<p class="comment">
+<strong>IMPORTANT NOTES</strong>: <code>np</code> in the output is the number of paired considered within the separation distance <code>dist</code>; <code>gamma</code> is the averaged semivariance for the number of paired points within the separation distance <code>dist</code>.
+</p>
+<p></br></p>
+<p>Let us plot these values to see the empirical semivariogram</p>
+<pre class="r"><code>plot(SO2_emp.variogram)</code></pre>
+<center>
+<img src="Image2_2.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
+</center>
+<p>From the output (i.e., plot and table), we should note the approximate values for the <code>partial sill</code>, <code>nugget</code> and <code>range</code>. 1. The <code>nugget</code> is roughly <strong>17</strong> (i.e. base on starting <code>gamma</code> value from the table). 2. The <code>range</code> is roughly <strong>1180000</strong> meters (i.e. base on peak value for <code>gamma</code> and it’s corresponding <code>dist</code>). 3. The <code>partial sill</code> is <strong>65</strong>. This is derived from the peak value for <code>gamma</code> subtracted by the <code>nugget</code> (<code>82 - 17 = 65</code>).</p>
+<p>These initial values give us an idea of what to expect when we proceed to fit a <strong>theoretical</strong> semivariogram using the <code>fit.variogram()</code>. It will help us to generate the fitted models.</p>
+<p></br></p>
+</div>
+<div id="plotting-the-theoretical-semivariogram" class="section level2">
+<h2><strong>2.3. Plotting the Theoretical Semivariogram</strong></h2>
+<p>We are going to fit a model to the empirical semivariogram in order to determine the appropriate function for Kriging (i.e., spherical (<code>Sph</code>), exponential (<code>Exp</code>) or gaussian (<code>Gau</code>)).</p>
+<p>We will start fitting the various models:</p>
+<pre class="r"><code># Fit exponential
+exp_SO2_emp.variogram &lt;- fit.variogram(SO2_emp.variogram, model = vgm(65, &quot;Exp&quot;, 1180000, 17))
+exp_SO2_emp.variogram
+plot(SO2_emp.variogram, exp_SO2_emp.variogram, main  = &quot;Exponential model (Nug: 3.6, PSill: 55.9, Range: 296255m)&quot;)</code></pre>
+<center>
+<img src="Image2_3.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
+</center>
+<pre class="r"><code># Fit Spherical
+sph_SO2_emp.variogram &lt;- fit.variogram(SO2_emp.variogram, model = vgm(65, &quot;Sph&quot;, 1180000, 17))
+sph_SO2_emp.variogram
+plot(SO2_emp.variogram, sph_SO2_emp.variogram, main  = &quot;Spherical model (Nug: 10.5, PSill: 49.6, Range: 857452m)&quot;)</code></pre>
+<center>
+<img src="Image2_4.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
+</center>
+<pre class="r"><code># Fit gaussian
+gau_SO2_emp.variogram &lt;- fit.variogram(SO2_emp.variogram, model = vgm(65, &quot;Gau&quot;, 1180000, 17))
+gau_SO2_emp.variogram
+plot(SO2_emp.variogram, gau_SO2_emp.variogram, main  = &quot;Gaussian model (Nug: 12.8, PSill: 39.1, Range: 244807m)&quot;)</code></pre>
+<center>
+<img src="Image2_5.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
+</center>
+<p>By eyeballing the images - it difficult to discern whether the exponential or spherical model provides a better fit to the empirical semivariogram. We can use the <code>fit.variogram()</code> function to determine which is the best model amongst them.</p>
+<pre class="r"><code># select the best model
+best_SO2_emp.variogram &lt;- fit.variogram(SO2_emp.variogram, model = vgm(c(&quot;Exp&quot;, &quot;Gau&quot;, &quot;Sph&quot;)))
+best_SO2_emp.variogram</code></pre>
+<pre><code>##   model     psill    range
+## 1   Nug  3.628312      0.0
+## 2   Exp 55.971076 296255.7</code></pre>
+<p>From the output (see column which says <code>model</code> and <code>row 2</code> it highlights <code>"Exp"</code>), it shows that the exponential model is the best fit with a <code>nugget = 3.6</code>, <code>Partial Sill =  55.9</code> and <code>Range = 296255m</code>. We therefore select the exponential model in our Kriging to make the spatial prediction for <span class="math inline">\(SO_{2}\)</span>. Lets proceed to Krige.</p>
+<center>
+<img src="Image2_3.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
+</center>
+<p class="comment">
+<strong>IMPORTANT NOTES</strong>: The interpretation is as follows: the <code>nugget</code> in the exponential model is smaller than the other proposed models. It is small which is also an indication of evidence of larger spatial dependence in the concentrations for <span class="math inline">\(SO_{2}\)</span> across sampling sites in USA; A separation distance with values beyond <code>296255m</code> (where it curve starts to plateau) and beyond the semivariance’s threshold where it flat lines (sill of <code>59.5</code> (i.e., <code>55.9 + 3.6</code>)) - there should expect that the spatial autocorrelation in the observed levels of <span class="math inline">\(SO_{2}\)</span> are not present anymore.
+</p>
+<hr style="border:2px solid gray">
+</hr>
 </div>
 
 

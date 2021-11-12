@@ -93,19 +93,24 @@ library("sp")
 
 ```{r, include = FALSE}
 library("gstat")
+library("geoR")
 ```
 
 The above packages `sf`, `tmap`, `raster` & `sp`  should have been installed in the previous session(s). We will need to 
 install the following package:
 
 - `gstat`: provides functions for univariable and multivariable geostatistical analysis.
+- `geoR`: provides additional functions for geostatistical and variogram analysis.
+
 
 ```{r, eval = FALSE}
 # Install the packages: gstat using the install.package()
 install.packages("gstat")
+install.packages("geoR")
 
 # Load the packages with library()
 library("gstat")
+library("geoR")
 ```
 
 </br>

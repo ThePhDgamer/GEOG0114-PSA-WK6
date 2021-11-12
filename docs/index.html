@@ -304,11 +304,11 @@ pre {
 </hr>
 <div id="lets-begin" class="section level2">
 <h2><strong>1.1. Let’s begin</strong></h2>
-<p>In previous sessions, we investigated the presence of spatial autocorrelation in data using <strong>Moran I’s test</strong> and in spatial lag and error models. Today, we will learn how to do this through <strong>semivariogram</strong> analysis which can be used to create continuous predictive maps based on spatial interpolation using <strong>Kriging</strong>. In this session, we will investigate spatial variation in outcomes that are, in theory, <strong>spatially continuous</strong>; for example, the concentrations of ambient air pollutants such as Sulphur dioxide (<span class="math inline">\(SO_{2}\)</span>) (a toxic gas emitted from sulphur rich fuels (i.e., coal, oil or diesel) when burnt) which can be present anywhere but in practice are only measured in specified point locations, such as air quality monitoring stations.</p>
+<p>In previous sessions, we investigated the presence of spatial autocorrelation in data using <strong>Moran’s I test</strong> and in spatial lag and error models. Today, we will learn how to do this through <strong>semivariogram</strong> analysis which can be used to create continuous predictive maps based on spatial interpolation using <strong>Kriging</strong>. In this session, we will investigate spatial variation in outcomes that are, in theory, <strong>spatially continuous</strong>; for example, the concentrations of ambient air pollutants such as Sulphur dioxide (<span class="math inline">\(SO_{2}\)</span>) (a toxic gas emitted from sulphur rich fuels (i.e., coal, oil or diesel) when burnt) which can be present anywhere but in practice are only measured in specified point locations, such as air quality monitoring stations.</p>
 <p>We will assess for the presence of spatial autocorrelation, which describes the correlation of a variable with itself through geographic space. Here, a <strong>Positive Autocorrelation</strong> exists when measurements close to one another are alike than they would be due to chance or through random sampling. The presence of autocorrelation for spatially continuous phenomena can be established using <strong>semivariograms</strong>.</p>
-<p>Estimation from model semivariograms can be used to <strong>interpolate</strong> across a study area, whereby values at unsampled locations are predicted from neighbouring sites. A popular form of interpolation, which is based on the spatial attribute’s outcome variable, is known as Kriging (a technique named after a South African engineer, Danie G. Krige (1919 to 2013)).</p>
-<p><strong>OBJECTIVES</strong>: The US Environmental Agency have position air quality monitors for surveillance of over 100 different types pollutants that exist as toxic gases, particulates and heavy metals. For <strong>Sulphur Dioxide</strong> (<span class="math inline">\(SO_{2}\)</span>), there are 458 active air monitors that takes hourly readings for concentrations of <span class="math inline">\(SO_{2}\)</span> (in parts per billion (pbb)) . An annual estimate for <span class="math inline">\(SO_{2}\)</span> was calculated for each station at its location. Car usage, alongside of other anthropogenic activities such as coal burning, across the USA increases the risk of elevated pollution of <span class="math inline">\(SO_{2}\)</span>.</p>
-<p>Using geostatistical methods and taking into account of car usage - what areas in USA have higher concentrations of <span class="math inline">\(SO_{2}\)</span> exceeding the annual average of 40 ppb which a national safety limit for cause of concern?</p>
+<p>Estimation from model semivariograms can be used to <strong>interpolate</strong> across a study area, whereby values at unsampled locations are predicted from neighbouring sites. A popular form of interpolation, which is based on the spatial attribute’s outcome variable, is known as <strong>Kriging</strong> (a technique named after a South African engineer, Danie G. Krige (1919 to 2013)).</p>
+<p><strong>OBJECTIVES</strong>: The US Environmental Agency have positioned air quality monitors for surveillance of over 100 different types of pollutants that exist as toxic gases, particulates and heavy metals. For <strong>Sulphur Dioxide</strong> (<span class="math inline">\(SO_{2}\)</span>), there are 458 active air monitors that takes hourly readings for concentrations of <span class="math inline">\(SO_{2}\)</span> (in parts per billion (pbb)). An annual estimate for <span class="math inline">\(SO_{2}\)</span> was calculated for each station at its location. Car usage, alongside of other anthropogenic activities such as coal burning, across the USA increases the risk of elevated pollution of <span class="math inline">\(SO_{2}\)</span>.</p>
+<p>Using geostatistical methods and taking into account of car usage - what areas in USA have higher concentrations of <span class="math inline">\(SO_{2}\)</span> exceeding the annual average of 40 ppb which is a national safety limit for cause of concern?</p>
 <p></br></p>
 </div>
 <div id="datasets-setting-up-the-work-directory" class="section level2">
@@ -336,12 +336,15 @@ library(&quot;sp&quot;)</code></pre>
 <p>The above packages <code>sf</code>, <code>tmap</code>, <code>raster</code> &amp; <code>sp</code> should have been installed in the previous session(s). We will need to install the following package:</p>
 <ul>
 <li><code>gstat</code>: provides functions for univariable and multivariable geostatistical analysis.</li>
+<li><code>geoR</code>: provides additional functions for geostatistical and variogram analysis.</li>
 </ul>
 <pre class="r"><code># Install the packages: gstat using the install.package()
 install.packages(&quot;gstat&quot;)
+install.packages(&quot;geoR&quot;)
 
 # Load the packages with library()
-library(&quot;gstat&quot;)</code></pre>
+library(&quot;gstat&quot;)
+library(&quot;geoR&quot;)</code></pre>
 <p></br></p>
 </div>
 <div id="loading-datasets" class="section level2">
