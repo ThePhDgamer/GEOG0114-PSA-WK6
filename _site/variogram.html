@@ -293,6 +293,13 @@ body{/* Normal */
     text-align: justify;
 }
 
+p.comment {
+background-color: #DBDBDB;
+padding: 10px;
+border: 1px solid black;
+border-radius: 5px;
+}
+
 code.r{
   font-size: 10px;
 }
@@ -304,6 +311,19 @@ pre {
 </hr>
 <div id="semivariogram-analysis" class="section level2">
 <h2><strong>2.1. Semivariogram analysis</strong></h2>
+<p>Semivariograms describe how data are related with distance by plotting the <strong>semivariance</strong> against the <strong>separation distance</strong>, known as the experimental semivariogram. The semivariance is defined as half the average squared difference between points separated by some distance <em>h</em>. As the separation distance <em>h</em> between samples increase, we would expect the semivariance to also increase (again, because near samples are more similar than distant samples).</p>
+<center>
+<img src="Image2_1.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
+</center>
+<p>In the generic semivariogram shown above, there are three important parameters:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Sill</strong>: The maximum semivariance value observed, and it indicates the threshold for values beyond (i.e., flatline) which there is no spatial autocorrelation. <strong>NOTE</strong>: the <strong>Partial Sill</strong> is a value calculated by taking the difference between the <strong>Sill</strong> and <strong>Nugget</strong> (i.e., <strong>Partial Sill = Sill - Nugget</strong>)</li>
+<li><strong>Range</strong>: The maximum separation distance <em>h</em> at which we will expect to find evidence of spatial autocorrelation. A separation distance beyond the <strong>range</strong> samples are no longer correlated.</li>
+<li><strong>Nugget</strong>: This describes the variance of the measurement error combined with spatially uncorrelated variations at distances shorter than the sample spacing, namely noise in the data. The larger the <strong>nugget</strong> relative to the <strong>sill</strong>, the less spatial dependence there is in the data and less useful Kriging will be.</li>
+</ol>
+<p class="comment">
+<strong>IMPORTANT NOTES</strong>: Two important assumptions of a basic semivariogram are that the spatial process under investigation are: i.) <strong>stationary</strong>, i.e., the spatial autocorrelation between the measurements of same variables in a given area is the same for all locations; and ii.) <strong>isotropic</strong>, spatial autocorrelation is the same in every direction. If the autocorrelation differs by direction, it is termed as <strong>anisotropic</strong>.
+</p>
 </div>
 
 
