@@ -353,7 +353,17 @@ tm_shape(US_Nation_Border_shp) + tm_polygons(alpha = 0, border.col = &quot;black
 <img src="Image3_1.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
 </center>
 <p>The above shows the predicted concentrations of ambient <span class="math inline">\(SO_{2}\)</span>; however, the predicted surface is very smooth and it difficult to see the spatial patterns. One technique, which is sometimes useful, for raster data is to reclassify the pixels to zones instead of pixel-point estimates.</p>
-<p>We could reclassify the continuous values stored in the grids/pixels into discrete values using the following scheme: - 0 = <code>"&lt; 1.0 ppb"</code> - 1 = <code>"1.0-4.9 ppb"</code> - 2 = <code>"5.0-9.9 ppb"</code> - 3 = <code>"10.0-14.9 ppb"</code> - 4 = <code>"15.0-19.9 ppb"</code> - 5 = <code>"20.0-29.9 ppb"</code> - 6 = <code>"30.0-39.9 ppb"</code> - 7 = <code>"+40.0 ppb"</code></p>
+<p>We could reclassify the continuous values stored in the grids/pixels into discrete values using the following scheme:</p>
+<ul>
+<li>0 = <code>"&lt; 1.0 ppb"</code></li>
+<li>1 = <code>"1.0-4.9 ppb"</code></li>
+<li>2 = <code>"5.0-9.9 ppb"</code></li>
+<li>3 = <code>"10.0-14.9 ppb"</code></li>
+<li>4 = <code>"15.0-19.9 ppb"</code></li>
+<li>5 = <code>"20.0-29.9 ppb"</code></li>
+<li>6 = <code>"30.0-39.9 ppb"</code></li>
+<li>7 = <code>"+40.0 ppb"</code></li>
+</ul>
 <p>You can do this by using following code:</p>
 <pre class="r"><code># Create a vector for the reclassification -i.e., 1st row captures values between 0 and below 1 to reclassify a pixel as 0
 # the 2nd row in this vector captures values between 1 and below 5 to reclassify a pixel as 1 and so on and so forth

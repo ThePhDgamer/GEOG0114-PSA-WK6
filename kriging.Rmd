@@ -127,6 +127,7 @@ to see the spatial patterns. One technique, which is sometimes useful, for raste
 of pixel-point estimates.
 
 We could reclassify the continuous values stored in the grids/pixels into discrete values using the following scheme:
+
 - 0 = `"< 1.0 ppb"`
 - 1 = `"1.0-4.9 ppb"`
 - 2 = `"5.0-9.9 ppb"`

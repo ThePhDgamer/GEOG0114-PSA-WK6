@@ -42,6 +42,7 @@ pre {
 - 3. **Technical Document**: Adela Volfova and Martin Smejkal, (2012), Geostatistical Methods in R. [**Download here**](https://www.researchgate.net/publication/272387573_Geostatistical_Methods_in_R/fulltext/55d63b7708aec156b9a850ea/Geostatistical-Methods-in-R.pdf?_sg%5B0%5D=E5UZBMhmZTUl03YkyOT6gfvSk-S9g0IxXYiBhog_MfA9jqVOAzfTrAL3uMFSf0rrcKPuP9r3uyx6CMqQaA6bZQ.Cmagou1MIf5IxTr09yZJ-VhaHnbSDJ6y4NVO8_8-mibVZp-Gow6ZptzkVE5muRV48tnwPVS0-0k69RXQOqd_Xw.pIpgRxYsyH5s36fBIoOHiOIYoV8layFubFo7AgAin9lirZgLcebRlzWzo9omeCpcRwwfJqOs7mVjfc8QE2lrEQ&_sg%5B1%5D=0nUelBLaKscENV-KeJ8660rYfLvHCPJdr9CCdXvdDdM4mdA0kk2JxyJSwF1Ymtgv9R_9naagCOgpmWgyq9Lfmwx3x5EFDIGePxNphad637Ey.Cmagou1MIf5IxTr09yZJ-VhaHnbSDJ6y4NVO8_8-mibVZp-Gow6ZptzkVE5muRV48tnwPVS0-0k69RXQOqd_Xw.pIpgRxYsyH5s36fBIoOHiOIYoV8layFubFo7AgAin9lirZgLcebRlzWzo9omeCpcRwwfJqOs7mVjfc8QE2lrEQ&_sg%5B2%5D=QtqpO-j-RpX4hiitIj14MC5Gm1Gz1hZQSYmbLbJddRhf9DWkpUwzthLo5_11zPPhLWXWyi-9whnPTpo.41FOaAYvHKCCInPr1E1qE4k5xMCKLIRE1awT4SlB7Zvs3IJYERUdEGthq1WH5XTXdVPpt7yDbGXHCJQuoUlGmQ&_iepl=)
 - 4. **Book**: Roger S. Bivand, Edzer J. Pebesma and Virgilio Gomez-Rubio, (2008), Applied Spatial Data Analysis with R, Chapter 8: Interpolation and Geostatistics, pages 191 to 235.
 - 5. **Book**: Michael Dorman, (2014), Learning R for Geospatial Analysis, Chapter 8: Spatial Interpolation of Point Data, pages 241 to 279.
+- 6. **Book**: Christopher D. Lloyd, (2010), Spatial Data Analysis: An Introduction for GIS Users, Chapter 9: Spatial Interpolation (Section 9.7. Ordinary Kriging), pages 140 to 150.
 
 </br>
 
