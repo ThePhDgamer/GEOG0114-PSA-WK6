@@ -307,8 +307,8 @@ pre {
 <p>In previous sessions, we investigated the presence of spatial autocorrelation in data using <strong>Moran’s I test</strong> and in spatial lag and error models. Today, we will learn how to do this through <strong>semivariogram</strong> analysis which can be used to create continuous predictive maps based on spatial interpolation using <strong>Kriging</strong>. In this session, we will investigate spatial variation in outcomes that are, in theory, <strong>spatially continuous</strong>; for example, the concentrations of ambient air pollutants such as Sulphur dioxide (<span class="math inline">\(SO_{2}\)</span>) (a toxic gas emitted from sulphur rich fuels (i.e., coal, oil or diesel) when burnt) which can be present anywhere but in practice are only measured in specified point locations, such as air quality monitoring stations.</p>
 <p>We will assess for the presence of spatial autocorrelation, which describes the correlation of a variable with itself through geographic space. Here, a <strong>Positive Autocorrelation</strong> exists when measurements close to one another are alike than they would be due to chance or through random sampling. The presence of autocorrelation for spatially continuous phenomena can be established using <strong>semivariograms</strong>.</p>
 <p>Estimation from model semivariograms can be used to <strong>interpolate</strong> across a study area, whereby values at unsampled locations are predicted from neighbouring sites. A popular form of interpolation, which is based on the spatial attribute’s outcome variable, is known as <strong>Kriging</strong> (a technique named after a South African engineer, Danie G. Krige (1919 to 2013)).</p>
-<p><strong>OBJECTIVES</strong>: The US Environmental Agency have positioned air quality monitors for surveillance of over 100 different types of pollutants that exist as toxic gases, particulates and heavy metals. For <strong>Sulphur Dioxide</strong> (<span class="math inline">\(SO_{2}\)</span>), there are 458 active air monitors that takes hourly readings for concentrations of <span class="math inline">\(SO_{2}\)</span> (in parts per billion (pbb)). An annual estimate for <span class="math inline">\(SO_{2}\)</span> was calculated for each station at its location. Car usage, alongside of other anthropogenic activities such as coal burning, across the USA increases the risk of elevated pollution of <span class="math inline">\(SO_{2}\)</span>.</p>
-<p>Using geostatistical methods and taking into account of car usage - what areas in USA have higher concentrations of <span class="math inline">\(SO_{2}\)</span> exceeding the annual average of 40 ppb which is a national safety limit for cause of concern?</p>
+<p><strong>OBJECTIVES</strong>: The US Environmental Agency have positioned air quality monitors for surveillance of over 100 different types of pollutants that exist as toxic gases, particulates and heavy metals. For <strong>Sulphur Dioxide</strong> (<span class="math inline">\(SO_{2}\)</span>), there are 458 active air monitors that takes hourly readings for concentrations of <span class="math inline">\(SO_{2}\)</span> (in parts per billion (pbb)). An annual estimate for <span class="math inline">\(SO_{2}\)</span> was calculated for each station at its location. Car usage, urbanisation and social economic deprivation, alongside of other anthropogenic activities such as coal burning, across the USA increases the risk of elevated pollution of <span class="math inline">\(SO_{2}\)</span>.</p>
+<p>Using geostatistical methods and taking into account of <strong>car usage, urbanisation and levels of deprivation</strong> - what areas in USA have higher concentrations of <span class="math inline">\(SO_{2}\)</span> exceeding the annual average of 40 ppb which is a national safety limit for cause of concern?</p>
 <p></br></p>
 </div>
 <div id="datasets-setting-up-the-work-directory" class="section level2">
@@ -382,18 +382,17 @@ datafile &lt;- read.csv(file = &quot;US 2019 SO2 Emissions data.csv&quot;, heade
 <td>Annual Mean (ppb) concentrations of Ambient sulphur dioxide (<span class="math inline">\(SO_{2}\)</span>) in 2019</td>
 </tr>
 <tr class="odd">
-<td><code>CarIndex</code></td>
-<td>Proportion of households within a census tract that own at least 2 cars</td>
-</tr>
-<tr class="even">
 <td></td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li>US National border shape file: <code>US Nation Border.shp</code></li>
-<li>US State border shape file: <code>US State Borders.shp</code></li>
+<li>Shape file: US National border named <code>US Nation Border.shp</code></li>
+<li>Shape file: US State border named <code>US State Borders.shp</code></li>
+<li>Raster: US Car Usage (5000m resolution) named <code>US Prevalence of Car Usage 5km.tif</code></li>
+<li>Raster: US Urbanisation Index (5000m resolution) named <code>US Urbanisation Index 5km.tif</code></li>
+<li>Raster: US Socioeconomic Deprivation (5000m resolution) named <code>US Socioeconomic Deprivation 5km.tif</code></li>
 </ul>
 <pre class="r"><code># Use read_sf() function to load shape file 
 US_Nation_Border_shp &lt;- st_read(&quot;US Nation Border.shp&quot;)</code></pre>

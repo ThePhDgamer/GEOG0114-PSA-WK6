@@ -48,7 +48,8 @@ pre {
 
 ## **4.2. Data Sources**
 1. The pollution data was obtained from the United States Environmental Protection Agency (EPA) [**Click Here**](https://aqs.epa.gov/aqsweb/airdata/download_files.html) 
-2. Spatial data concerning car usage in the US was sourced from the ACS Vehicle Availability Variables project [**Click Here**](https://www.arcgis.com/home/item.html?id=9a9e43ec1603446880c50d4ed1df2207). You would need to have Online ArcGIS account to access the resources. 
+2. Spatial data concerning car usage in the US was sourced from the ACS Vehicle Availability Variables project [**Click Here**](https://www.arcgis.com/home/item.html?id=9a9e43ec1603446880c50d4ed1df2207). You would need to have Online ArcGIS account to access the resources.
+3. US raster data for Social Vulnerability Index 2018 and Urbanization Index (2015) were sourced from the NASA Socioeconomic Data & Applications Center (SEDAC) [**Click Here**](https://sedac.ciesin.columbia.edu). **NOTE**: Registeration required for free access to raster records
 
 </br>
 
