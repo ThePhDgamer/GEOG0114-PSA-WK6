@@ -339,7 +339,8 @@ writeRaster(exp.prediction, &quot;Predicted SO2 levels in USA.tif&quot;, format=
 writeRaster(exp.variance, &quot;Variance SO2 levels in USA.tif&quot;, format=&quot;GTiff&quot;, overwrite = TRUE)</code></pre>
 <p>Let us visualise the predictions:</p>
 <pre class="r"><code># mask values of raster outside regions of US Border
-exp.prediction_masked &lt;- mask(exp.prediction, US_Nation_Border_sp_shp)
+US_Nation_Border_sp_shp &lt;- as(US_Nation_Border_shp, &quot;Spatial&quot;)
+exp.prediction_masked &lt;- mask(exp.prediction, US_Nation_Border_shp)
 
 tm_shape(US_Nation_Border_shp) + tm_polygons(alpha = 0, border.col = &quot;black&quot;) + # add base map of borders here
     tm_shape(exp.prediction_masked) + tm_raster(title = &quot;Predicted SO2 ppb&quot;, style = &quot;cont&quot;, palette = &quot;Reds&quot;) +
@@ -419,32 +420,147 @@ tm_shape(US_Nation_Border_shp) + tm_polygons(alpha = 0, border.col = &quot;black
 <img src="Image3_2.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
 </center>
 <p class="comment">
-<strong>IMPORTANT NOTES</strong>: The above example was a null model. We can include risk factors as adjustments for the prediction. The below code shows you how to incorporate other variables in the analysis. We will use the <code>CarIndex</code> column. In most cases the results are similar.
+<strong>IMPORTANT NOTES</strong>: The above example was a null model. We can include risk factors as adjustments for the prediction. The below code shows you how to incorporate other variables in the analysis. We will use the other raster data sets for urbanisation, deprivation and car usage as adjustments in the Kriging model.
 </p>
-<pre class="r"><code># use variogram() function to compute the semivariance 
-SO2_adj_emp.variogram &lt;- variogram(Mean_SO2~CarIndex, datafile_sp_prj)
-# Compute the object to reveal a table
+</div>
+<div id="kriging-with-regression" class="section level2">
+<h2><strong>3.4. Kriging with Regression</strong></h2>
+<pre class="r"><code># CORRECTIONS APPLIED
+
+library(&quot;sf&quot;)
+library(&quot;sp&quot;)
+library(&quot;raster&quot;)
+library(&quot;tmap&quot;)
+library(&quot;gstat&quot;)
+library(&quot;geoR&quot;)
+
+datafile &lt;- read.csv(file = &quot;US 2019 SO2 Emissions data.csv&quot;, header=TRUE, sep=&quot;,&quot;)
+
+US_Nation_Border_shp &lt;- st_read(&quot;US Nation Border.shp&quot;)
+US_State_Borders_shp &lt;- st_read(&quot;US State Borders.shp&quot;)
+
+# Coerce the spreadsheet into a sf object
+# First tell R that it’s coordinates are currently in decimal degrees (i.e., WGS84 &#39;crs = 4326&#39;) before the transformation
+datafile_sf &lt;- st_as_sf(datafile, coords = c(&quot;Longitude&quot;, &quot;Latitude&quot;), crs = 4326)
+# Now apply the transformation from WGS84 to Mercator i.e., = 3857
+datafile_sf_prj &lt;- st_transform(datafile_sf, 3857)
+# Inspect the details
+st_crs(datafile_sf_prj)
+
+# Step 1: Load rasters. These are the covariates we will use in the gstat() function for the kriging regression
+US_urbanisation &lt;- raster(&quot;US Urbanisation Index 5km.tif&quot;)
+US_SVI &lt;- raster(&quot;US Socioeconomic Deprivation 5km.tif&quot;)
+US_CarUsage &lt;- raster(&quot;US Prevalence of Car Usage 5km.tif&quot;)
+# ignore that stupid warning message as its related to outdated &#39;rgdal &amp; rgeos&#39;. All raster are in the CRS Mercator 3857
+
+# Step 2: Stack the three rasters together by using the stack() function 
+predictors &lt;- stack(US_urbanisation, US_SVI, US_CarUsage)
+
+# Step 3: from the stacked data extract the raster values on the points of pollution stations using the extract() function
+predictors.values &lt;- extract(predictors, datafile_sp_prj)
+
+# Step 4: Stitch the extraction to the spatial point data frame using the cbind() &quot;column bind&quot; function
+datafile_sp_prj@data &lt;- cbind(datafile_sp_prj@data, predictors.values)
+
+# You can view the dataframe to see the raster values. What has happened is we extracted the overlapping raster pixels on
+# those pollution stations and assuming those are the levels of urbanisation, deprivation and car usage at those points for
+# which the SO2 levels are observed. 
+View(datafile_sp_prj@data)
+
+# Step 5: Linear Regression model to determine which variables are worth to be included in the Kriging model. If the turn out
+# to be statistical significant (i.e., p &lt; 0.05). Then include to include in the kriging.
+lm.model &lt;- lm(Mean_SO2 ~ US_Urbanisation_Index_5km + US_Socioeconomic_Deprivation_5km + US_Prevalence_of_Car_Usage_5km, data = datafile_sp_prj@data)
+summary(lm.model)
+
+# all variables are statistically significant. According to this model urbanisation and car usage marginally decreases SO2 levels,
+# while areas of higher deprivation yields higher levels of SO2. Include all variables to the Kriging model since they are
+# significant.
+
+# Step 6: use variogram() function to compute the semivariance with variable in the model
+SO2_adj_emp.variogram &lt;- variogram(Mean_SO2 ~ US_Urbanisation_Index_5km + US_Socioeconomic_Deprivation_5km + US_Prevalence_of_Car_Usage_5km, datafile_sp_prj)
 SO2_adj_emp.variogram
-# Plot the empirical semivariogram and extract initial values
 plot(SO2_adj_emp.variogram)
 
-# Determine best model
+# Step 7: Determine best model
 best_SO2_adj_emp.variogram &lt;- fit.variogram(SO2_adj_emp.variogram, model = vgm(c(&quot;Exp&quot;, &quot;Gau&quot;, &quot;Sph&quot;)))
-best_SO2_adj_emp.variogram # exponential is the best again. 
-plot(SO2_adj_emp.variogram, best_SO2_adj_emp.variogram, main = &quot;Best Model: Exponential (Nug: 3.6, PSill: 55.9, Range: 295077m)&quot;)
+best_SO2_adj_emp.variogram
+plot(SO2_adj_emp.variogram, best_SO2_adj_emp.variogram, main = &quot;Best Model: Exponential (Nug: 5.63, PSill: 49.4, Range: 293891.2m)&quot;)
 
-# reusing raster templates for predictions
-modelKrigingExp_adj &lt;- gstat(formula = Mean_SO2~CarIndex, locations = datafile_sp_prj, model = best_SO2_adj_emp.variogram)
-Kriged_SO2_adj &lt;- predict(modelKrigingExp_adj, grid.interpolation)
+# HERE ARE THE CORRECTIONS
+# Step 8: Here is where we need to insert the raster values and not the points. In the previous iteration, I mistakenly used the
+# point verison of the car usage data and adapted the code without verifying it to work. I sincerely apologise for this oversight!
+modelKrigingExp_adj &lt;- gstat(formula = Mean_SO2~US_Urbanisation_Index_5km + US_Socioeconomic_Deprivation_5km + US_Prevalence_of_Car_Usage_5km, locations = datafile_sp_prj, model = best_SO2_adj_emp.variogram)
+
+# Take the stacked rasters for car usage, urbanisation and socioeconomic deprivation and convert it to a grid template
+# Here, we need their values stored inside that grid template, to which we will apply the kriging model to make the prediction
+# while at the same time make adjustments for their value.
+
+# we created the stacked into the &#39;predictors&#39; object
+predictors.grid &lt;- as(predictors, &quot;SpatialGridDataFrame&quot;)
+
+# Last time it was just &quot;SpatialGrid&quot; because it was empty. This grid has values and thus not empty 
+# so we call it &quot;SpatialGridDataFrame&quot;
+
+# Step 9: We can now do the predictions over the SpatialGridDataFrame
+Kriged_SO2_adj &lt;- predict(modelKrigingExp_adj, predictors.grid)
+
+# Brick the layer in order to separate the estimated prediction and variance accordingly
 brickedKriged_SO2_Results_adj &lt;- brick(Kriged_SO2_adj)
-
 exp.prediction_adj &lt;- raster(brickedKriged_SO2_Results_adj, layer = 1)
 exp.variance_adj &lt;- raster(brickedKriged_SO2_Results_adj, layer = 2)
 
-writeRaster(exp.prediction_adj, &quot;Adjusted Predicted SO2 levels in USA.tif&quot;, format=&quot;GTiff&quot;, overwrite = TRUE)
-writeRaster(exp.variance_adj, &quot;Adjusted Variance SO2 levels in USA.tif&quot;, format=&quot;GTiff&quot;, overwrite = TRUE)
+# Step 10: Masking the prediction and reclassifying the layer
+# You can mask the prediction with the outline of USA
+US_Nation_Border_sp_shp &lt;- as(US_Nation_Border_shp, &quot;Spatial&quot;)
+exp.prediction_adj_masked &lt;- mask(exp.prediction_adj, US_Nation_Border_sp_shp)
 
-# use tmap functions like before</code></pre>
+# Run this to see minimum and maximum value.
+exp.prediction_adj_masked
+
+# You can see there are negative value as some of the prediction for SO2. 
+# Lets reclassify these as an invalid prediction with value -1
+reclassifyRaster &lt;- c(-2,0,-1, 
+0,1,0,
+1,5,1,
+5,10,2,
+10,15,3,
+15,20,4,
+20,30,5,
+30,40,6,
+40,70,7)
+
+reclassifyRaster_Mat &lt;- matrix(reclassifyRaster, ncol=3, byrow=TRUE)
+reclassifyRaster_Mat
+
+# Apply the categories to masked layer in order to reclassify the predictions that were adjusted those 3 variables
+exp.prediction_adj_masked_rec &lt;- reclassify(exp.prediction_adj_masked, reclassifyRaster_Mat)
+# Create the labels for the &#39;reclassifyRaster_Mat&quot; object
+SO2LevelsCategories &lt;- c(&quot;Invalid&quot;,&quot;&lt;1.0 ppbs&quot;,&quot;1.0-4.9 ppb&quot;,&quot;5.0-9.9 ppb&quot;, &quot;10.0-14.9 ppb&quot; , &quot;15.0-19.9 ppb&quot;, &quot;20.0-29.9 ppb&quot;, &quot;30.0-39.9 ppb&quot;,&quot;+40.0ppb&quot;)
+
+# Finally, we going to force the colour schemes we want. 
+# We want the &quot;Invalid&quot; category to have a grey colour; and the rest for lowest category
+# ie., &quot;&lt;1.0ppbs&quot; to &quot;+40.0ppb&quot; to be increase red intensities&quot;
+
+# Force the colorbrewer schemes grey = #636363
+# Force the reds (from light red down to solid-dark-red) = #fee5d9, #fcbba1, #fc9272, #fb6a4a, #ef3b2c, #cb181d, #99000d
+
+# Create the colour scheme for the above &#39;SO2LevelsCategories&#39;
+HackedColourPalette &lt;- c(&quot;#636363&quot;, &quot;#fee5d9&quot;, &quot;#fcbba1&quot;, &quot;#fc9272&quot;, &quot;#fb6a4a&quot;, &quot;#ef3b2c&quot;, &quot;#cb181d&quot;, &quot;#99000d&quot;)
+
+# Step 11: Visual the adjusted prediction from Universal Kriging Regression
+tm_shape(US_Nation_Border_shp) + 
+    tm_polygons(alpha = 0, border.col = &quot;black&quot;) + # add base map of borders here
+    tm_shape(exp.prediction_adj_masked_rec) + 
+    tm_raster(title = &quot;Predicted adjusted SO2 ppb&quot;, style = &quot;cat&quot;, palette = HackedColourPalette, labels = SO2LevelsCategories) +
+    tm_shape(US_State_Borders_shp) + tm_polygons(alpha = 0, border.col = &quot;black&quot;) +
+    tm_text(&quot;STUSPS&quot;, size = &quot;AREA&quot;) +
+    tm_shape(datafile_sf_prj) + tm_dots() + 
+    tm_scale_bar(position = c(&quot;left&quot;,&quot;bottom&quot;)) +
+    tm_compass(position = c(&quot;right&quot;, &quot;bottom&quot;)) +
+    tm_layout(frame = FALSE, legend.title.size = 0.5, legend.text.size = 0.5)</code></pre>
+<center>
+<img src="Image3_3.png" title="fig:" alt="“/Users/anwarmusah/Documents/GITHUB/GEOG0114-PSA-WK6/GEOG0114-PSA-WK6”" />
+<center>
 <hr style="border:2px solid gray">
 </hr>
 </div>
